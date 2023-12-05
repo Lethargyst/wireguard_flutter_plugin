@@ -13,4 +13,16 @@ class WireguardFlutter {
   Future<String?> getPublicKey() {
     return WireguardFlutterPlatform.instance.getPublicKey();
   }
+
+  Future<void> setInterface(Map<String, dynamic> data) async {
+    WireguardFlutterPlatform.instance.setInterface(data);
+  }
+
+  Future<void> setPeer(Map<String, dynamic> data) async {
+    WireguardFlutterPlatform.instance.setPeer(data);
+  }
+
+  Future<void> toggleVPN() async {
+    WireguardFlutterPlatform.instance.toggleVPN();
+  }
 }

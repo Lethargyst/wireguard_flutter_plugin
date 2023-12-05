@@ -24,14 +24,26 @@ abstract class WireguardFlutterPlatform extends PlatformInterface {
   }
 
   Future<void> genKeyPair() {
-    throw UnimplementedError('getPrivateKey() has not been implemented.');
+    throw UnimplementedError('genKeyPair() has not been implemented.');
   }
 
   Future<String?> getPrivateKey() {
-    return WireguardFlutterPlatform.instance.getPrivateKey();
+    throw UnimplementedError('getPrivateKey() has not been implemented.');
   }
 
   Future<String?> getPublicKey() {
     throw UnimplementedError('getPublicKey() has not been implemented.');
+  }
+
+  Future<void> setInterface(Map<String, dynamic> data) {
+    throw UnimplementedError('setInterface() has not been implemented.');
+  }
+
+  Future<void> setPeer(Map<String, dynamic> data) {
+    throw UnimplementedError('setPeer() has not been implemented.');
+  }
+
+  Future<void> toggleVPN() {
+    throw UnimplementedError('toggleVPN() has not been implemented.');
   }
 }

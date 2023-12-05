@@ -28,7 +28,7 @@ class WireguardFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "setInterface" -> WgService.setInterface(call.arguments, result)
             "setPeer" -> WgService.setPeer(call.arguments, result)
-            "toggleVPN" -> null
+            "toggleVPN" -> WgService.toggleConnection(appContext, result)
         }
     }
 

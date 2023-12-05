@@ -1,6 +1,9 @@
 package com.lethargyst.wireguard_flutter
 
+import android.app.Activity
 import com.beust.klaxon.Klaxon
+import com.wireguard.android.backend.Backend
+import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import com.wireguard.config.InetEndpoint
@@ -10,11 +13,12 @@ import com.wireguard.config.Peer
 import io.flutter.plugin.common.MethodChannel.Result
 import java.net.InetAddress
 
+
 class WgService {
     companion object Wg {
-        private var wgInterface: Interface.Builder = Interface.Builder();
-        private var wgPeer: Peer.Builder = Peer.Builder();
-        private var wgConfig: Config.Builder = Config.Builder();
+        private var wgInterface: Interface? = null;
+        private var wgPeer: Peer? = null;
+        private var wgConfig: Config? = null;
 
         fun setInterface(arguments: Any, result: Result) {
             val params = Klaxon().parse<WgInterface>(arguments.toString());
@@ -24,32 +28,59 @@ class WgService {
                 return
             }
 
-            wgInterface.parsePrivateKey(params.interfaceKey)
-            wgInterface.addAddress(InetNetwork.parse(params.address))
-            wgInterface.parseListenPort(params.listenPort)
-            wgInterface.addDnsServer(InetAddress.getByName(params.dns))
+            val interfaceBuilder = Interface.Builder()
+            interfaceBuilder.parsePrivateKey(params.interfaceKey)
+            interfaceBuilder.addAddress(InetNetwork.parse(params.address))
+            interfaceBuilder.parseListenPort(params.listenPort)
+            interfaceBuilder.addDnsServer(InetAddress.getByName(params.dns))
+
+            wgInterface = interfaceBuilder.build()
 
             result.success("Success")
         }
 
         fun setPeer(arguments: Any, result: Result) {
-            val params = Klaxon().parse<WgPeer>(arguments.toString());
+            val params = Klaxon().parse<WgPeer>(arguments.toString())
 
             if (params == null) {
                 result.error("Peer", "Peer params is missing", null)
                 return
             }
 
-            wgPeer.parsePublicKey(params.peerKey)
-            wgPeer.setEndpoint(InetEndpoint.parse(params.endpoint))
-            wgPeer.addAllowedIp(InetNetwork.parse(params.allowedIp))
+            val peerBuilder = Peer.Builder()
+            peerBuilder.parsePublicKey(params.peerKey)
+            peerBuilder.setEndpoint(InetEndpoint.parse(params.endpoint))
+            peerBuilder.addAllowedIp(InetNetwork.parse(params.allowedIp))
+
+            wgPeer = peerBuilder.build()
 
             result.success("Success")
         }
 
-        fun connect(result: Result) {
+        fun toggleConnection(context: Activity, result: Result) {
+            if (wgInterface == null) {
+                result.error("Interface","There are no wireguard interface configured!", null)
+                return
+            }
+            if (wgPeer == null) {
+                result.error("Peer", "There are no wireguard peer configured!", null)
+                return
+            }
+
             val tunnel: Tunnel = WgTunnel()
-//            val intentPrepare = GoBackend.VpnService.prepare(requireActivity())
+            val intent = GoBackend.VpnService.prepare(context)
+
+            if (intent != null) {
+                context.startActivityForResult(intent, 0)
+            }
+
+            val backend: Backend = GoBackend(context)
+            wgConfig = Config.Builder()
+                .setInterface(wgInterface!!)
+                .addPeer(wgPeer!!)
+                .build()
+
+            backend.setState(tunnel, Tunnel.State.TOGGLE, wgConfig)
         }
     }
 

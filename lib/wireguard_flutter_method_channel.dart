@@ -23,4 +23,19 @@ class MethodChannelWireguardFlutter extends WireguardFlutterPlatform {
   Future<String?> getPublicKey() async {
     return await methodChannel.invokeMethod<String>('genPublicKey');
   }
+
+  @override
+  Future<void> setInterface(Map<String, dynamic> data) async {
+    await methodChannel.invokeMethod<String>('setInterface', data);
+  }
+
+  @override
+  Future<void> setPeer(Map<String, dynamic> data) async {
+    await methodChannel.invokeMethod<String>('setPeer', data);
+  }
+
+  @override
+  Future<void> toggleVPN() async {
+    await methodChannel.invokeMethod<String>('toggleVPN');
+  }
 }
